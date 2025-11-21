@@ -18,19 +18,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Generate docs list
+      - name: Generate docs index
         run: |
-          echo "## 📚 Documentation" > docs_list.tmp
-          echo "" >> docs_list.tmp
+          echo "# Documentation Index" > public/docs/index.md
+          echo "" >> public/docs/index.md
 
-          find "public/docs" -type f -name "*.md" ! -name "index.md" | sort | while read f; do
-            rel="${f#docs/}"                 # Remove docs/ prefix
-            title="${rel%.*}"                # Remove .md extension
+          find public/docs -type f -name "*.md" ! -name "index.md" | sort | while read f; do
+            # strip folder prefix
+            rel="${f#public/docs/}"
+            title="${rel%.*}"
 
-            # URL-escape spaces → %20
+            # escape spaces
             url=$(printf '%s' "$f" | sed 's/ /%20/g')
 
-            echo "- [$title]($url)" >> docs_list.tmp
+            echo "- [$title]($url)" >> public/docs/index.md
           done
 
       - name: Inject into README.md
