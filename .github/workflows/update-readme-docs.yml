@@ -33,7 +33,7 @@ jobs:
             title="${rel%.*}"
 
             # escape spaces for GitHub links
-            url=$(printf '%s' "$f" | sed 's/ /%20/g')
+            url=$(printf '%s' "$rel" | sed 's/ /%20/g')
 
             echo "- [$title]($url)" >> public/docs/index.md
           done
