@@ -1,4 +1,4 @@
-name: Update README Docs Index
+name: Update Docs Index
 
 on:
   push:
@@ -6,11 +6,10 @@ on:
       - main
     paths:
       - "public/docs/**"
-
   workflow_dispatch:
 
 permissions:
-  contents: write  
+  contents: write
 
 jobs:
   build:
@@ -20,44 +19,34 @@ jobs:
 
       - name: Generate docs index
         run: |
+          # ensure the folder exists
+          mkdir -p public/docs
+
+          # create or overwrite index.md
           echo "# Documentation Index" > public/docs/index.md
           echo "" >> public/docs/index.md
 
+          # generate list of all .md files except index.md
           find public/docs -type f -name "*.md" ! -name "index.md" | sort | while read f; do
             # strip folder prefix
             rel="${f#public/docs/}"
             title="${rel%.*}"
 
-            # escape spaces
+            # escape spaces for GitHub links
             url=$(printf '%s' "$f" | sed 's/ /%20/g')
 
             echo "- [$title]($url)" >> public/docs/index.md
           done
 
-      - name: Inject into README.md
-        run: |
-          # Markers: keep everything outside these untouched
-          start="<!-- DOCS-LIST:START -->"
-          end="<!-- DOCS-LIST:END -->"
-
-          # If markers don't exist, append them
-          if ! grep -q "$start" "public/docs/index.md"; then
-            echo -e "\n$start\n$end" >> "public/docs/index.md"
-          fi
-
-          # Replace block
-          sed -i "/$start/,/$end/{/$start/{p; r docs_list.tmp
-              }; /$end/p; d}" "public/docs/index.md"
-
       - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add README.md
+          git add public/docs/index.md
 
           if git diff --cached --quiet; then
-            echo "No changes."
+            echo "No changes to commit."
           else
-            git commit -m "Update docs list in README"
+            git commit -m "Update public/docs/index.md"
             git push
           fi
