@@ -37,13 +37,13 @@ jobs:
           end="<!-- DOCS-LIST:END -->"
 
           # If markers don't exist, append them
-          if ! grep -q "$start" README.md; then
-            echo -e "\n$start\n$end" >> README.md
+          if ! grep -q "$start" "public/docs/index.md"; then
+            echo -e "\n$start\n$end" >> "public/docs/index.md"
           fi
 
           # Replace block
           sed -i "/$start/,/$end/{/$start/{p; r docs_list.tmp
-              }; /$end/p; d}" README.md
+              }; /$end/p; d}" "public/docs/index.md"
 
       - name: Commit changes
         run: |
