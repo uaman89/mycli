@@ -20,7 +20,7 @@ jobs:
           echo "## 📚 Documentation" > docs_list.tmp
           echo "" >> docs_list.tmp
 
-          find docs -type f -name "*.md" ! -name "index.md" | sort | while read f; do
+          find "public/docs" -type f -name "*.md" ! -name "index.md" | sort | while read f; do
             rel="${f#docs/}"
             title="${rel%.*}"
             echo "- [$title]($f)" >> docs_list.tmp
