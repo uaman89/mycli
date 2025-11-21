@@ -2,8 +2,7 @@ name: Update README Docs Index
 
 on:
   push:
-    paths:
-      - "docs/**"
+      - "public/docs/**"
   workflow_dispatch:
 
 permissions:
