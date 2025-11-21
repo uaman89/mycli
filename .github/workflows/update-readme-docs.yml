@@ -1,0 +1,52 @@
+name: Update README Docs Index
+
+on:
+  push:
+    paths:
+      - "docs/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate docs list
+        run: |
+          echo "## 📚 Documentation" > docs_list.tmp
+          echo "" >> docs_list.tmp
+
+          find docs -type f -name "*.md" ! -name "index.md" | sort | while read f; do
+            rel="${f#docs/}"
+            title="${rel%.*}"
+            echo "- [$title]($f)" >> docs_list.tmp
+          done
+
+      - name: Inject into README.md
+        run: |
+          # Markers: keep everything outside these untouched
+          start="<!-- DOCS-LIST:START -->"
+          end="<!-- DOCS-LIST:END -->"
+
+          # If markers don't exist, append them
+          if ! grep -q "$start" README.md; then
+            echo -e "\n$start\n$end" >> README.md
+          fi
+
+          # Replace block
+          sed -i "/$start/,/$end/{/$start/{p; r docs_list.tmp
+              }; /$end/p; d}" README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add README.md
+
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "Update docs list in README"
+            git push
+          fi
